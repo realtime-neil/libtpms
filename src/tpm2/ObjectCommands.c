@@ -166,7 +166,8 @@ TPM2_Load(
     if(result == TPM_RC_SUCCESS)
 	{
 	    // Set the common OBJECT attributes for a loaded object.
-	    ObjectSetLoadedAttributes(newObject, in->parentHandle);
+	    ObjectSetLoadedAttributes(newObject, in->parentHandle,
+	                              parentObject->seedCompatLevel); // libtpms added
 	}
     return result;
 }
@@ -224,7 +225,8 @@ TPM2_LoadExternal(
 	{
 	    object->attributes.external = SET;
 	    // Set the common OBJECT attributes for a loaded object.
-	    ObjectSetLoadedAttributes(object, in->hierarchy);
+	    ObjectSetLoadedAttributes(object, in->hierarchy,
+				      SEED_COMPAT_LEVEL_LAST); // libtpms added
 	}
     return result;
 }
@@ -418,6 +420,7 @@ TPM2_CreateLoaded(
     RAND_STATE                   randState;
     RAND_STATE                  *rand = &randState;
     TPMS_DERIVE                  labelContext;
+    SEED_COMPAT_LEVEL            seedCompatLevel = SEED_COMPAT_LEVEL_LAST; // libtpms added
     // Input Validation
     // How the public area is unmarshaled is determined by the parent, so
     // see if parent is a derivation parent
@@ -484,6 +487,7 @@ TPM2_CreateLoaded(
 	    // Clear the sensitive size so that the creation functions will not try
 	    // to use this value.
 	    in->inSensitive.sensitive.data.t.size = 0;
+	    seedCompatLevel = parent->seedCompatLevel;               // libtpms added
 	}
     else
 	{
@@ -501,6 +505,8 @@ TPM2_CreateLoaded(
 	            newObject->attributes.primary = SET;
 	            if(in->parentHandle == TPM_RH_ENDORSEMENT)
 	                newObject->attributes.epsHierarchy = SET;
+		    seedCompatLevel =
+		        HierarchyGetPrimarySeedCompatLevel(in->parentHandle); // libtpms added
 	            // If so, use the primary seed and the digest of the template
 	            // to seed the DRBG
 		    result = DRBG_InstantiateSeeded((DRBG_STATE *)rand,
@@ -508,7 +514,7 @@ TPM2_CreateLoaded(
 						    PRIMARY_OBJECT_CREATION,
 						    (TPM2B *)PublicMarshalAndComputeName(publicArea,&name),
 						    &in->inSensitive.sensitive.data.b,
-						    HierarchyGetPrimarySeedCompatLevel(in->parentHandle)); // libtpms added
+						    seedCompatLevel);        // libtpms added
 		    if (result != TPM_RC_SUCCESS)
 			return result;
 	        }
@@ -534,7 +540,8 @@ TPM2_CreateLoaded(
     out->outPublic.publicArea = newObject->publicArea;
     out->name = newObject->name;
     // Set the remaining attributes for a loaded object
-    ObjectSetLoadedAttributes(newObject, in->parentHandle);
+    ObjectSetLoadedAttributes(newObject, in->parentHandle,
+                              seedCompatLevel); // libtpms added
     return result;
 }
 #endif // CC_CreateLoaded
