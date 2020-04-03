@@ -10,6 +10,13 @@ addons:
     packages:
       - devscripts
       - dpkg-dev
+      - equivs
+      - fakeroot
+      - libdistro-info-perl
+      - libfile-fcntllock-perl
+      - libparse-debcontrol-perl
+      - lintian
+      - xz-utils
 before_script:
   - mk-build-deps -ir
 script:
