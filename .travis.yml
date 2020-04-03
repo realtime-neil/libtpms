@@ -1,5 +1,4 @@
 language: c
-sudo: yes
 os:
   - linux
 dist:
@@ -17,11 +16,12 @@ addons:
       - libfile-fcntllock-perl
       - libparse-debcontrol-perl
       - lintian
+      - sudo
       - xz-utils
 before_script:
   - sudo mk-build-deps -ir
 script:
-  - dpkg-buildpackage -sa -us -uc --jobs="$(nproc)"
+  - dpkg-buildpackage -sa -us -uc -j"$(nproc)"
 after_script:
   - find .. -maxdepth 1 -type f -name '*.changes' -exec lintian {} \;
 env:
