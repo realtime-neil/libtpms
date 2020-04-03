@@ -1,6 +1,7 @@
 language: c
 os:
   - linux
+dist: bionic
 addons:
   apt:
     packages:
@@ -20,7 +21,7 @@ script:
   - dpkg-buildpackage -sa -us -uc -j$(nproc)
 after_script:
   - find .. -maxdepth 1 -type f -name '*.changes' | xargs lintian
-matrix:
+jobs:
   include:
     - dist: bionic
     - dist: xenial
