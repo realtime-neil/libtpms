@@ -5,6 +5,11 @@ dist:
   - trusty
   - xenial
   - bionic
+addons:
+  apt:
+    packages:
+      - devscripts
+      - dpkg-dev
 before_script:
   - mk-build-deps -ir
 script:
