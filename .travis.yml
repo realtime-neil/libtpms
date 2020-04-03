@@ -1,4 +1,5 @@
 language: c
+sudo: yes
 os:
   - linux
 dist:
@@ -18,7 +19,7 @@ addons:
       - lintian
       - xz-utils
 before_script:
-  - mk-build-deps -ir
+  - sudo mk-build-deps -ir
 script:
   - dpkg-buildpackage -sa -us -uc --jobs="$(nproc)"
 after_script:
